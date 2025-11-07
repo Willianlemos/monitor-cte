@@ -1,0 +1,17 @@
+﻿services:
+  - type: worker
+    name: monitor-cte
+    env: node
+    plan: free
+    autoDeploy: true
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: ENDPOINT
+        value: https://monitorsefaz.webmaniabr.com/v2/components.json
+      - key: UFS
+        value: SP,MG
+      - key: SCHEDULE
+        value: "*/5 * * * *"
+      - key: SLACK_WEBHOOK_URL
+        sync: false
