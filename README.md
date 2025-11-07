@@ -48,3 +48,23 @@ No Windows PowerShell:
 ## ObservaÃ§Ãµes
 - O arquivo .env Ã© ignorado pelo Git. NÃ£o comite segredos.
 - Caso um segredo tenha sido exposto, revogue/rotacione no provedor (ex.: Slack) e atualize seu .env.
+
+## Teste de situaÃ§Ã£o nÃ£o operacional (simulaÃ§Ã£o)
+VocÃª pode simular que determinadas UFs nÃ£o estÃ£o operacionais para testar alertas.
+
+Local (uma execuÃ§Ã£o):
+`ash
+SIMULATE_NON_OPERATIONAL=SP SIMULATE_STATUS=MAJOR_OUTAGE RUN_ONCE=1 npm start
+`
+PowerShell (Windows):
+`powershell
+="SP"; ="MAJOR_OUTAGE"; ="1"; npm start
+`
+
+No Render (recomendado para teste controlado):
+- Adicione env vars temporÃ¡rias:
+  - SIMULATE_NON_OPERATIONAL=SP (ou SP,MG)
+  - SIMULATE_STATUS=MAJOR_OUTAGE (opcional)
+  - RUN_ONCE=1
+- FaÃ§a um Deploy; verifique o log/Slack.
+- Remova RUN_ONCE e SIMULATE_* apÃ³s o teste para voltar ao comportamento normal.

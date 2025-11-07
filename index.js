@@ -22,6 +22,15 @@ const SCHEDULE = process.env.SCHEDULE || "*/5 * * * *"; // padrão: a cada 5 min
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
 const STATE_FILE = path.join(__dirname, "state.json");
 
+// ===== Simulação (teste) =====
+const SIMULATE_NON_OPERATIONAL = (process.env.SIMULATE_NON_OPERATIONAL || "")
+  .split(",")
+  .map((s) => s.trim().toUpperCase())
+  .filter(Boolean);
+const SIMULATE_STATUS = process.env.SIMULATE_STATUS || "MAJOR_OUTAGE";
+const SIMULATE_INCIDENT =
+  process.env.SIMULATE_INCIDENT || "Indisponibilidade simulada";
+
 // ===== Estado em memória =====
 let lastStatus = {};
 
@@ -68,7 +77,7 @@ async function loadStatuses() {
     (c) => c.group && c.group.name === "Autorizadores de CT-e" && UFS.includes(c.name)
   );
 
-  return UFS.map((uf) => {
+  const statuses = UFS.map((uf) => {
     const item = cte.find((x) => x.name === uf);
     return {
       uf,
@@ -76,6 +85,17 @@ async function loadStatuses() {
       incidente: item?.activeIncidents?.[0]?.name || "",
     };
   });
+
+  // Aplica simulação, se configurada
+  if (SIMULATE_NON_OPERATIONAL.length > 0) {
+    return statuses.map((s) =>
+      SIMULATE_NON_OPERATIONAL.includes(s.uf)
+        ? { ...s, status: SIMULATE_STATUS, incidente: SIMULATE_INCIDENT }
+        : s
+    );
+  }
+
+  return statuses;
 }
 
 // ===== Comparação e alerta =====
